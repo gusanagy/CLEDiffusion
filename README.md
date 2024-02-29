@@ -1,4 +1,4 @@
-# **(MM2023)CLE Diffusion: Controllable Light Enhancement Diffusion Model**
+# ** Modified CLE Diffusion: Controllable Light Enhancement Diffusion Model for underwater color correction**
 Authors: Yuyang Yin, Dejia Xu, Chuangchuang Tan, Ping Liu, Yao Zhao, Yunchao Wei
 
 Institutions: Beijing Jiaotong University, UT Austin, A*Star
