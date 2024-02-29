@@ -29,9 +29,12 @@ Download [Mask CLE Diffusion Pretrianed model](https://drive.google.com/file/d/1
 ```python
 pip install -r requirements.txt
 ```
+
 or 
 
+```
 conda env create -f CLEDiff_bkp.yaml
+```
 
 for conda envoiriments
 
