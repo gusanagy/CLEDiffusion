@@ -29,6 +29,11 @@ Download [Mask CLE Diffusion Pretrianed model](https://drive.google.com/file/d/1
 ```python
 pip install -r requirements.txt
 ```
+or 
+
+conda env create -f CLEDiff_bkp.yaml
+
+for conda envoiriments
 
 # Usage
 Our diffusion code structure is based on the original implementation of DDPM. Increasing the size of the U-Net may lead to better results.
