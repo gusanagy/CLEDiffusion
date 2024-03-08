@@ -210,16 +210,17 @@ def Test(config: Dict):
                     ssim_list.append(ssim_score)
                     print('psnr:', psnr, '  ssim:', ssim_score)
 
-                    # show result
-                    # output = np.concatenate([low_img, gt_img, res_Imgs], axis=1) / 255
+                    #show result
+                    output = np.concatenate([low_img, gt_img, res_Imgs], axis=1) / 255
                     #output = np.concatenate([low_img, gt_img, res_Imgs, res_trick], axis=1) / 255
+
                     # plt.axis('off')
                     # plt.imshow(output)
                     # plt.show()
                     # save_path = save_dir + name
-                    # cv2.imwrite(save_path, output * 255)
-                    save_path =save_dir+ name
-                    cv2.imwrite(save_path, res_Imgs)
+                    #cv2.imwrite(save_path, output * 255)
+                    # save_path =save_dir+ name
+                    #cv2.imwrite(save_path, res_Imgs)
   
                 avg_psnr = sum(psnr_list) / len(psnr_list)
                 avg_ssim = sum(ssim_list) / len(ssim_list)
@@ -231,7 +232,8 @@ def Test(config: Dict):
                     "Average PSNR": avg_psnr,
                     "Average SSIM": avg_ssim,
                     "PSNR": psnr,
-                    "SSIM": ssim_score}})
+                    "SSIM": ssim_score,
+                    "Image": [wandb.Image(output, caption="Image")]}})
 
                 f = open(save_txt_name, 'w+')
                 f.write('\npsnr_orgin :')
