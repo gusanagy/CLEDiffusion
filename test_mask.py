@@ -31,6 +31,8 @@ from albumentations.pytorch import ToTensorV2
 import lpips
 import time
 import argparse
+import wandb
+
 
 class load_data_test(data.Dataset):
     def __init__(self, input_data_low, mask_path):
@@ -197,7 +199,9 @@ def Test(config: Dict):
                         sampledImgs=(sampledImgs+1)/2
                         res_Imgs=np.clip(sampledImgs.detach().cpu().numpy()[0].transpose(1, 2, 0),0,1)[:,:,::-1] 
 
-                    
+                        wandb.log({"Inference CLE_mask_DIF":
+                                   {"Mask Image Inference": [wandb.Image(res_Imgs, caption="Image")],
+                                   "Mask Image Inference *255": [wandb.Image(res_Imgs*255, caption="Image")]}})
                         save_path =save_dir+ config.data_name+'_level'+str(i)+'.png'
                         print(save_path)
                         cv2.imwrite(save_path, res_Imgs*255)
@@ -245,5 +249,12 @@ if __name__== "__main__" :
     for key, value in modelConfig.items():
         setattr(config, key, value)
     print(config)
-    
+    wandb.init(
+        project="CLEDiffusion",
+        config=vars(config),
+        name="Inferencia mask Diffusao",
+        tags=["Inference"],
+        group="diffusion_mask_inference",
+        job_type="evaluation",
+    )
     Test(config)

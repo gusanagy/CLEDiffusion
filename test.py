@@ -31,6 +31,8 @@ from albumentations.pytorch import ToTensorV2
 import lpips
 import time
 import argparse
+import wandb
+
 
 class load_data_test(data.Dataset):
     def __init__(self, input_data_low, input_data_high):
@@ -224,6 +226,13 @@ def Test(config: Dict):
                 print('psnr_orgin_avg:', avg_psnr)
                 print('ssim_orgin_avg:', avg_ssim)
 
+                # Wandb logs 
+                wandb.log({"Inference":{
+                    "Average PSNR": avg_psnr,
+                    "Average SSIM": avg_ssim,
+                    "PSNR": psnr,
+                    "SSIM": ssim_score}})
+
                 f = open(save_txt_name, 'w+')
                 f.write('\npsnr_orgin :')
                 f.write(str(psnr_list))
@@ -275,5 +284,15 @@ if __name__== "__main__" :
     for key, value in modelConfig.items():
         setattr(config, key, value)
     print(config)
+
+    wandb.init(
+            project="CLEDiffusion",
+            config=vars(config),
+            name="Inferencia Diffusao",
+            tags=["Inference"],
+            group="diffusion_inference",
+            job_type="evaluation",
+        )
     
     Test(config)
+    wandb.finish()

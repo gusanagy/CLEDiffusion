@@ -31,6 +31,8 @@ from albumentations.pytorch import ToTensorV2
 import lpips
 import time
 import argparse
+import wandb
+
 
 class load_data(data.Dataset):
     def __init__(self, input_data_low, input_data_high):
@@ -226,7 +228,7 @@ def train(config: Dict):
         
     net_model = UNet_Mask(T=config.T, ch=config.channel, ch_mult=config.channel_mult, attn=config.attn,
                      num_res_blocks=config.num_res_blocks, dropout=config.dropout)
-
+    #Erro ao carregar o state dict e o modelo
     if config.pretrained_path is not None:
         ckpt = torch.load(os.path.join(
                 config.pretrained_path), map_location='cpu')
@@ -316,6 +318,16 @@ def train(config: Dict):
                                              "col_loss":col_num,
                                             "vgg_loss":vgg_num,
                                               }, num)
+               #Wandb Logs 
+                wandb.log({"Train":{
+                    "epoch": e,
+                    "Loss: ": loss_num,
+                    "MSE Loss":mse_num,
+                    "EXP Loss":exp_num,
+                    "COL Loss":col_num,
+                    'SSIM Loss':ssim_num,
+                    'VGG Loss':vgg_num,
+                }})
                 num+=1
         warmUpScheduler.step()
         
@@ -369,5 +381,14 @@ if __name__== "__main__" :
     for key, value in modelConfig.items():
         setattr(config, key, value)
     print(config)
+    wandb.init(
+        project="CLEDiffusion",
+        config=vars(config),
+        name="Treino Mask Diffusao",
+        tags=["Train"],
+        group="diffusion_mask_train",
+        job_type="train",
+    )
     train(config)
+    wandb.finish()
     #Test_for_one(modelConfig,epoch=14000)

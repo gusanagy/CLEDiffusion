@@ -1,0 +1,8 @@
+Train ->    carrega os dados :data_low, data_high,data_color,data_blur,self.input_data_low[idx] 
+            passa para a rede:  data_high, data_low,data_concate,e
+            funcoes de perda: loss, mse_loss, col_loss,exp_loss,ssim_loss,vgg_loss
+test ->     carrega os dados :data_low, data_high,data_color,data_blur,self.input_data_low[idx] 
+            passa para a rede: lowlight_image, data_concate,brightness_level,
+            metricas: "Average PSNR" "Average SSIM" "PSNR" "SSIM"
+train mask ->
+test mask ->

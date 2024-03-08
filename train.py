@@ -271,18 +271,6 @@ def train(config: Dict):
                 ssim_loss=ssim_loss.mean()
                 vgg_loss = vgg_loss.mean()
                 loss.backward()
-                #Adicionar uma flag do wandb para acompanhar a epoch e a loss 
-                wandb.log({
-                    "epoch": e,
-                    "loss: ": loss.item(),
-                    "mse_loss":mse_loss.item(),
-                    "exp_loss":exp_loss.item(),
-                    "col_loss":col_loss.item(),
-                    'ssim_loss':ssim_loss.item(),
-                    'vgg_loss':vgg_loss.item(),
-                    "LR": optimizer.state_dict()['param_groups'][0]["lr"],
-                    "num":num+1
-                })
 
                 torch.nn.utils.clip_grad_norm_(
                     net_model.parameters(), config.grad_clip)
@@ -311,6 +299,16 @@ def train(config: Dict):
                                              "col_loss":col_num,
                                             "vgg_loss":vgg_num,
                                               }, num)
+                #Wandb Logs 
+                wandb.log({"Train":{
+                    "epoch": e,
+                    "Loss: ": loss_num,
+                    "MSE Loss":mse_num,
+                    "EXP Loss":exp_num,
+                    "COL Loss":col_num,
+                    'SSIM Loss':ssim_num,
+                    'VGG Loss':vgg_num,
+                }})
                 num+=1
                 #Adicionar uma flag do wandb para acompanhar a loss// adaptar o summary writer do tensor board
 
@@ -435,7 +433,13 @@ def Test(config: Dict,epoch):
                 avg_psnr = sum(psnr_list) / len(psnr_list)
                 avg_ssim = sum(ssim_list) / len(ssim_list)
 
-                # Colocar flag no wandb para as variaveis avg_psnr avg_ssim
+                # Wandb logs 
+                wandb.log({"Test":{
+                    "Average PSNR": avg_psnr,
+                    "Average SSIM": avg_ssim,
+                    "PSNR": psnr,
+                    "SSIM": ssim_score,
+                    "epoch": epoch}})
 
                 print('psnr_orgin_avg:', avg_psnr)
                 print('ssim_orgin_avg:', avg_ssim)
@@ -493,7 +497,11 @@ if __name__== "__main__" :
     
     wandb.init(
             project="CLEDiffusion",
-            config=vars(config)
+            config=vars(config),
+            name="Treino Diffusao",
+            tags=["Inference"],
+            group="diffusion_train",
+            job_type="train",
         )
     
     for key, value in modelConfig.items():
