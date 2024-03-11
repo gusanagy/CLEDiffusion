@@ -324,7 +324,7 @@ def train(config: Dict):
                 torch.save(net_model.state_dict(), os.path.join(
                     ckpt_savedir, 'ckpt_' + str(e) + "_.pt"))
 
-        if e%50==0:
+        if e % 50==0:
             avg_psnr,avg_ssim=Test(config,e)
             write_data = 'epoch: {}  psnr: {:.4f} ssim: {:.4f}\n'.format(e, avg_psnr,avg_ssim)
             f = open(save_txt, 'a+')

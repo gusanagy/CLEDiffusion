@@ -229,6 +229,7 @@ def train(config: Dict):
     net_model = UNet_Mask(T=config.T, ch=config.channel, ch_mult=config.channel_mult, attn=config.attn,
                      num_res_blocks=config.num_res_blocks, dropout=config.dropout)
     #Erro ao carregar o state dict e o modelo
+    #Testar com os checkpoints dados pelo cara
     if config.pretrained_path is not None:
         ckpt = torch.load(os.path.join(
                 config.pretrained_path), map_location='cpu')
