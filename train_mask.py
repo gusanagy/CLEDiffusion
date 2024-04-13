@@ -233,11 +233,23 @@ def train(config: Dict):
     if config.pretrained_path is not None:
         ckpt = torch.load(os.path.join(
                 config.pretrained_path), map_location='cpu')
-        checkpoint = torch.load({k.replace('module.', ''): v for k, v in ckpt.items()})
-        state_dict = checkpoint['state_dict']
-        state_dict['conv1.weight'][:, :10, :, :] = state_dict['conv1.weight']
-        state_dict['conv1.weight'][:, 10, :, :] = torch.zeros_like(state_dict['conv1.weight'][:, 0, :, :])
-        state_dict['conv1.in_channels'] = 11
+        state_dict = {k.replace('module.', ''): v for k, v in ckpt.items()}
+        #param_tensor = 'head.weight'
+        #print('\n\n',param_tensor, "\t", state_dict[param_tensor].size(),'\n\n')
+        print((state_dict)['head.weight'].size())
+        pesos_anteriores = state_dict['head.weight']
+        state_dict['head.weight'] =  torch.zeros(state_dict['head.weight'].shape[0], 11, state_dict['head.weight'].shape[2], state_dict['head.weight'].shape[3])
+        print((state_dict)['head.weight'].size())
+        state_dict['head.weight'][:, :10, :, :] = pesos_anteriores
+        #state_dict['head.in_channels'] = 11
+
+        print("Model's state_dict:")
+        for param in state_dict:
+            if param=='head.in_channels':
+                print(param, "\t", state_dict[param])
+            else:
+                print(param, "\t", state_dict[param].size())
+        net_model.load_state_dict(state_dict)
 
     if config.DDP == True:
         net_model = DDP(net_model.cuda(), device_ids=[local_rank], output_device=local_rank,)
@@ -331,7 +343,7 @@ def train(config: Dict):
                 }})
                 num+=1
         warmUpScheduler.step()
-        
+        ### Modificar para salvar apenas o necessario ou excluir o checkpoint depois de salvar e enviar para a nuvem
         if e % 50 == 0 :
             if config.DDP == True:
                 if dist.get_rank() == 0:
