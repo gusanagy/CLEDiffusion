@@ -2,4 +2,5 @@ data
 output
 output_mask
 output_mask_inference
+__pycache__
 wandb
