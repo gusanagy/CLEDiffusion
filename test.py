@@ -234,6 +234,9 @@ def Test(config: Dict):
                     "PSNR": psnr,
                     "SSIM": ssim_score,
                     "Image": [wandb.Image(output, caption="Image")]}})
+                # Save the model in the exchangeable ONNX format
+                torch.onnx.export(model, "diff_nomask_model.onnx")
+                wandb.save("model.onnx")
 
                 f = open(save_txt_name, 'w+')
                 f.write('\npsnr_orgin :')
