@@ -4,28 +4,16 @@ import cv2 as cv
 import numpy as np
 import argparse
 import os
+from faster_light_adjust import adjust_brightness_opencv
 
 # Read image given by user
 parser = argparse.ArgumentParser(description='Code for Changing the brightness on the images in a folder.')
 parser.add_argument('--dir_p', help='Path to input parent directory.', default='')
 parser.add_argument('--dir_c', help='Path to input child directory.', default='')
 args = parser.parse_args()
-
-def low_light(image):
-    new_image = np.zeros(image.shape, image.dtype)
-    alpha = 1.0 # Simple contrast control
-    beta = -140    # Simple brightness control
-
-    # Do the operation new_image(i,j) = alpha*image(i,j) + beta
-    # Instead of these 'for' loops we could have used simply:
-    # new_image = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
-    # but we wanted to show you how to access the pixels :)
-    for y in range(image.shape[0]):
-        for x in range(image.shape[1]):
-            for c in range(image.shape[2]):
-                new_image[y,x,c] = np.clip(alpha*image[y,x,c] + beta, 0, 255)
-    return new_image
-
+alpha = 1.0 # Simple contrast control
+beta = -140    # Simple brightness control
+adjust_brightness_opencv(alpha=alpha,beta=beta)
 
 def processar_imagens_na_pasta(dir_entrada, dir_saida):
     # Criar diretório de saída se não existir
