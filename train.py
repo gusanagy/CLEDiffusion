@@ -56,18 +56,18 @@ class load_data(data.Dataset):
         seed = torch.random.seed()
 
         data_low = cv2.imread(self.input_data_low[idx])
+        data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
         data_low=data_low[:,:,::-1].copy()
         random.seed(1)
         data_low=data_low/255.0
 
         data_low=np.power(data_low,0.25)
         data_low = self.transform(image=data_low)["image"]
-         #mean and var of lol training dataset. If you change dataset, please change mean and var.
+        #mean and var of lol training dataset. If you change dataset, please change mean and var.
         mean=torch.tensor([0.4350, 0.4445, 0.4086])  
         var=torch.tensor([0.0193, 0.0134, 0.0199])
         data_low=(data_low-mean.view(3,1,1))/var.view(3,1,1)
         data_low=data_low/20
-
 
         data_max_r=data_low[0].max()
         data_max_g = data_low[1].max()
@@ -114,6 +114,8 @@ class load_data_test(data.Dataset):
         seed = torch.random.seed()
 
         data_low = cv2.imread(self.input_data_low[idx])
+        data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
+
         data_low=data_low[:,:,::-1].copy()
         random.seed(1)
         data_low=data_low/255.0
@@ -201,11 +203,17 @@ def train(config: Dict):
         dist.init_process_group(backend='nccl')
         device = torch.device("cuda", local_rank)
     
-    train_low_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
-    train_high_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
-    datapath_train_low = glob.glob(train_low_path)
-    datapath_train_high = glob.glob(train_high_path)
+    ###MODIFICAR AQUI AS FUNCOES PARA CARREGAR O DATASET E MUDAR A LUMINOSIDADE
+
+    # train_low_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
+    # train_high_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
+    #train_low_path=config.dataset_path+r'low/*.png'    #mudar endereços
+    image_train_path=config.dataset_path+r'*.png' #enderecamento geral para todas as imagens Dataset UW2Data
+
+    datapath_train_low = glob.glob(image_train_path)
+    datapath_train_high = glob.glob(image_train_path)
     dataload_train=load_data(datapath_train_low, datapath_train_high)
+
     if config.DDP == True:
         train_sampler = torch.utils.data.distributed.DistributedSampler(dataload_train)
         dataloader= DataLoader(dataload_train, batch_size=config.batch_size,sampler=train_sampler)
@@ -309,13 +317,13 @@ def train(config: Dict):
                     'SSIM Loss':ssim_num,
                     'VGG Loss':vgg_num,
                 }})
-                num+=1
+                num+=1## olhar no codigo original se ja estava assim esse num
                 #Adicionar uma flag do wandb para acompanhar a loss// adaptar o summary writer do tensor board
 
         warmUpScheduler.step()
 
         #save ckpt and evaluate on test dataset
-        if e % 50 == 0 :
+        if e % 300 == 0 or e == 1000:
             if config.DDP == True:
                 if dist.get_rank() == 0:
                     torch.save(net_model.state_dict(), os.path.join(
@@ -324,19 +332,19 @@ def train(config: Dict):
                 torch.save(net_model.state_dict(), os.path.join(
                     ckpt_savedir, 'ckpt_' + str(e) + "_.pt"))
 
-        if e % 50==0:
-            avg_psnr,avg_ssim=Test(config,e)
-            write_data = 'epoch: {}  psnr: {:.4f} ssim: {:.4f}\n'.format(e, avg_psnr,avg_ssim)
-            f = open(save_txt, 'a+')
-            f.write(write_data)
-            f.close()
+        # if e % 50==0:
+        #     avg_psnr,avg_ssim=Test(config,e)
+        #     write_data = 'epoch: {}  psnr: {:.4f} ssim: {:.4f}\n'.format(e, avg_psnr,avg_ssim)
+        #     f = open(save_txt, 'a+')
+        #     f.write(write_data)
+        #     f.close()
 
 
 def Test(config: Dict,epoch):
     # load model and evaluate
     device = config.device_list[0]
-    test_low_path=config.dataset_path+r'eval15/low/*.png'    
-    test_high_path=config.dataset_path+r'eval15/high/*.png' 
+    test_low_path=config.dataset_path+r'*.png'    
+    test_high_path=config.dataset_path+r'*.png' 
 
     datapath_test_low = glob.glob( test_low_path)
     datapath_test_high = glob.glob(test_high_path)
@@ -488,7 +496,7 @@ if __name__== "__main__" :
     }
 
 
-    parser.add_argument('--dataset_path', type=str, default="./data/LOL/")
+    parser.add_argument('--dataset_path', type=str, default="./data/UWData2k2/")
     parser.add_argument('--state', type=str, default="train")  #or eval
     parser.add_argument('--pretrained_path', type=str, default=None)  #or eval
     parser.add_argument('--output_path', type=str, default="./output/")  #or eval
@@ -498,10 +506,11 @@ if __name__== "__main__" :
     wandb.init(
             project="CLEDiffusion",
             config=vars(config),
-            name="Treino Diffusao",
-            tags=["Inference"],
+            name="Treino Diffusao sem mascaras",
+            tags=["Train","No mask"],
             group="diffusion_train",
             job_type="train",
+
         )
     
     for key, value in modelConfig.items():

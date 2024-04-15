@@ -63,6 +63,8 @@ class load_data(data.Dataset):
         seed = torch.random.seed()
 
         data_low = cv2.imread(self.input_data_low[idx])
+        data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
+
         data_low=data_low[:,:,::-1].copy()
         random.seed(1)
         data_low = self.transform(image=data_low)["image"]

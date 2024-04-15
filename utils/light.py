@@ -8,11 +8,11 @@ import argparse
 #parser.add_argument('--input', help='Path to input image.', default='lena.jpg')
 #args = parser.parse_args()
 #image = cv.imread(cv.samples.findFile(args.input))
-image = cv.imread("/home/pdi/Downloads/CLEDiffusion-final/CLEDiffusion-final/CLEDiffusion-main/data/LOL/our485/high/9.png")
-#if image is None:
-#    print('Could not open or find the image: ', args.input)
-#    exit(0)
-new_image = np.zeros(image.shape, image.dtype)
+image = cv.imread("LOL results/1.png")
+if image is None:
+   print('Could not open or find the image ')
+   exit(0)
+#new_image = np.zeros(image.shape, image.dtype)
 alpha = 1.0 # Simple contrast control
 beta = -140 # Simple brightness control
 """
@@ -29,11 +29,14 @@ except ValueError:
 # Instead of these 'for' loops we could have used simply:
 # new_image = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
 # but we wanted to show you how to access the pixels :)
-for y in range(image.shape[0]):
-    for x in range(image.shape[1]):
-        for c in range(image.shape[2]):
-            new_image[y,x,c] = np.clip(alpha*image[y,x,c] + beta, 0, 255)
+# for y in range(image.shape[0]):
+#     for x in range(image.shape[1]):
+#         for c in range(image.shape[2]):
+# new_image[y,x,c] = np.clip(alpha*image[y,x,c] + beta, 0, 255).astype(image.dtype)
+new_image = np.clip(alpha * image + beta, 0, 255).astype(image.dtype)
+
 cv.imshow('Original Image', image)
+
 cv.imshow('New Image', new_image)
 # Wait until user press some key
 cv.waitKey()
