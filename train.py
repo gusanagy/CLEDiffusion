@@ -201,11 +201,19 @@ def train(config: Dict):
         dist.init_process_group(backend='nccl')
         device = torch.device("cuda", local_rank)
     
-    train_low_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
-    train_high_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
+    ###MODIFICAR AQUI AS FUNCOES PARA CARREGAR O DATASET E MUDAR A LUMINOSIDADE
+
+    # train_low_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
+    # train_high_path=config.dataset_path+r'our485/low/*.png'    #mudar endereços
+    #train_low_path=config.dataset_path+r'low/*.png'    #mudar endereços
+    train_high_path=config.dataset_path+r'*.png'    #mudar endereços
+
     datapath_train_low = glob.glob(train_low_path)
     datapath_train_high = glob.glob(train_high_path)
     dataload_train=load_data(datapath_train_low, datapath_train_high)
+
+
+
     if config.DDP == True:
         train_sampler = torch.utils.data.distributed.DistributedSampler(dataload_train)
         dataloader= DataLoader(dataload_train, batch_size=config.batch_size,sampler=train_sampler)
@@ -309,13 +317,13 @@ def train(config: Dict):
                     'SSIM Loss':ssim_num,
                     'VGG Loss':vgg_num,
                 }})
-                num+=1
+                num+=1## olhar no codigo original se ja estava assim esse num
                 #Adicionar uma flag do wandb para acompanhar a loss// adaptar o summary writer do tensor board
 
         warmUpScheduler.step()
 
         #save ckpt and evaluate on test dataset
-        if e % 50 == 0 :
+        if e % 300 == 0 or e == 1000:
             if config.DDP == True:
                 if dist.get_rank() == 0:
                     torch.save(net_model.state_dict(), os.path.join(
@@ -324,12 +332,12 @@ def train(config: Dict):
                 torch.save(net_model.state_dict(), os.path.join(
                     ckpt_savedir, 'ckpt_' + str(e) + "_.pt"))
 
-        if e % 50==0:
-            avg_psnr,avg_ssim=Test(config,e)
-            write_data = 'epoch: {}  psnr: {:.4f} ssim: {:.4f}\n'.format(e, avg_psnr,avg_ssim)
-            f = open(save_txt, 'a+')
-            f.write(write_data)
-            f.close()
+        # if e % 50==0:
+        #     avg_psnr,avg_ssim=Test(config,e)
+        #     write_data = 'epoch: {}  psnr: {:.4f} ssim: {:.4f}\n'.format(e, avg_psnr,avg_ssim)
+        #     f = open(save_txt, 'a+')
+        #     f.write(write_data)
+        #     f.close()
 
 
 def Test(config: Dict,epoch):
@@ -498,10 +506,11 @@ if __name__== "__main__" :
     wandb.init(
             project="CLEDiffusion",
             config=vars(config),
-            name="Treino Diffusao",
-            tags=["Inference"],
+            name="Treino Diffusao sem mascaras",
+            tags=["Train","No mask"],
             group="diffusion_train",
             job_type="train",
+
         )
     
     for key, value in modelConfig.items():
