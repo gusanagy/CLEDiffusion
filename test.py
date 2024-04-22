@@ -53,6 +53,8 @@ class load_data_test(data.Dataset):
         seed = torch.random.seed()
 
         data_low = cv2.imread(self.input_data_low[idx])
+        data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
+
         data_low=data_low[:,:,::-1].copy()
         random.seed(1)
         data_low=data_low/255.0
@@ -129,10 +131,12 @@ def calculate_ssim(img1, img2):
 def Test(config: Dict):
     # load model and evaluate
     device = config.device_list[0]
-    test_low_path=config.dataset_path+r'eval15/low/*.png'    
-    test_high_path=config.dataset_path+r'eval15/high/*.png'
+    test_low_path=config.dataset_path+r'*.jpg'#modificar 
+    test_high_path=config.dataset_path+r'*.jpg'#modificar
+    
     datapath_test_low = glob.glob( test_low_path)
     datapath_test_high = glob.glob(test_high_path)
+    print(datapath_test_low[:5])
     dataload_test = load_data_test(datapath_test_low,datapath_test_high)
     dataloader = DataLoader(dataload_test, batch_size=1, num_workers=4,
                             drop_last=True, pin_memory=True)
@@ -145,6 +149,7 @@ def Test(config: Dict):
     ckpt = torch.load(ckpt_path,map_location='cpu')
     model.load_state_dict({k.replace('module.', ''): v for k, v in ckpt.items()})
     print("model load weight done.")
+
     save_dir=config.output_path+'/result/'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -169,7 +174,7 @@ def Test(config: Dict):
                 image_num = 0
                 for data_low, data_high, data_color,data_blur,filename in tqdmDataLoader:
                     name=filename[0].split('/')[-1]
-                    print('image:',name)
+                    print('\nimage:',name,'\n')
                     gt_image = data_high.to(device)
                     lowlight_image = data_low.to(device)
                     data_color = data_color.to(device)
@@ -221,22 +226,21 @@ def Test(config: Dict):
                     #cv2.imwrite(save_path, output * 255)
                     # save_path =save_dir+ name
                     #cv2.imwrite(save_path, res_Imgs)
+
+                     # Wandb logs 
+                    # wandb.log({"Inference":{
+                    #     "PSNR": psnr,
+                    #     "SSIM": ssim_score,
+                    #     "Image": [wandb.Image(output, caption="Image")]}})
   
-                avg_psnr = sum(psnr_list) / len(psnr_list)
-                avg_ssim = sum(ssim_list) / len(ssim_list)
+                avg_psnr = sum(psnr_list) / len(psnr_list) 
+                avg_ssim = sum(ssim_list) / len(ssim_list) 
                 print('psnr_orgin_avg:', avg_psnr)
                 print('ssim_orgin_avg:', avg_ssim)
 
-                # Wandb logs 
-                wandb.log({"Inference":{
-                    "Average PSNR": avg_psnr,
-                    "Average SSIM": avg_ssim,
-                    "PSNR": psnr,
-                    "SSIM": ssim_score,
-                    "Image": [wandb.Image(output, caption="Image")]}})
                 # Save the model in the exchangeable ONNX format
-                torch.onnx.export(model, "diff_nomask_model.onnx")
-                wandb.save("model.onnx")
+                #torch.onnx.export(model, "diff_nomask_model.onnx", )
+                #wandb.save("model.onnx")
 
                 f = open(save_txt_name, 'w+')
                 f.write('\npsnr_orgin :')
@@ -271,7 +275,7 @@ if __name__== "__main__" :
         "img_size": 32,
         "grad_clip": 1.,
         "device": "cuda:1",
-        "device_list": [0],
+        "device_list": [0, 1],
         #"device_list": [3,2,1,0],
         
         "ddim":True,
@@ -280,24 +284,24 @@ if __name__== "__main__" :
     }
 
 
-    parser.add_argument('--dataset_path', type=str, default="./data/LOL/")
+    parser.add_argument('--dataset_path', type=str, default="./data/UWData2k2/")
     parser.add_argument('--pretrained_path', type=str, default=None)  #or eval
     parser.add_argument('--output_path', type=str, default="./output/test/")  #or eval
 
     config = parser.parse_args()
-    
+    #    /data/RUIE/UCCS/blue   /data/RUIE/UCCS/blue-green   /data/RUIE/UCCS/green
     for key, value in modelConfig.items():
         setattr(config, key, value)
     print(config)
 
-    wandb.init(
-            project="CLEDiffusion",
-            config=vars(config),
-            name="Inferencia Diffusao",
-            tags=["Inference"],
-            group="diffusion_inference",
-            job_type="evaluation",
-        )
+    # wandb.init(
+    #         project="CLEDiffusion",
+    #         config=vars(config),
+    #         name="Inferencia Diffusao sem mascaras",
+    #         tags=["Inference"],
+    #         group="diffusion_inference",
+    #         job_type="evaluation",
+    #     )
     
     Test(config)
-    wandb.finish()
+    #wandb.finish()

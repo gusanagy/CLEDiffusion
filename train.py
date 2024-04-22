@@ -258,8 +258,8 @@ def train(config: Dict):
         os.makedirs(ckpt_savedir)
 
     save_txt= config.output_path + 'res.txt'
-    
     num=0
+    #num=600
     for e in range(config.epoch):
         if config.DDP == True:
            dataloader.sampler.set_epoch(e)
@@ -323,7 +323,8 @@ def train(config: Dict):
         warmUpScheduler.step()
 
         #save ckpt and evaluate on test dataset
-        if e % 300 == 0 or e == 1000:
+        #if e % 300 == 0 or e == 1000:
+        if e % 400 == 0:
             if config.DDP == True:
                 if dist.get_rank() == 0:
                     torch.save(net_model.state_dict(), os.path.join(
@@ -472,7 +473,7 @@ if __name__== "__main__" :
   
         "DDP": False,
         "state": "train", # or eval
-        "epoch": 10001,
+        "epoch": 601,#10001,
         "batch_size":16 ,
         "T": 1000,
         "channel": 128,
@@ -487,7 +488,7 @@ if __name__== "__main__" :
         "img_size": 32,
         "grad_clip": 1.,
         "device": "cuda", #MODIFIQUEI
-        "device_list": [0],
+        "device_list": [0, 1],
         #"device_list": [3,2,1,0],
         
         "ddim":True,
