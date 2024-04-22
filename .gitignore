@@ -5,4 +5,5 @@ output_mask_inference
 __pycache__
 wandb
 load.py
+terminal.sh
 

@@ -32,6 +32,7 @@ import lpips
 import time
 import argparse
 import wandb
+import matplotlib.pyplot as plt
 
 
 class load_data_test(data.Dataset):
@@ -131,8 +132,8 @@ def calculate_ssim(img1, img2):
 def Test(config: Dict):
     # load model and evaluate
     device = config.device_list[0]
-    test_low_path=config.dataset_path+r'*.jpg'#modificar 
-    test_high_path=config.dataset_path+r'*.jpg'#modificar
+    test_low_path=config.dataset_path+r'*.png'#modificar 
+    test_high_path=config.dataset_path+r'*.png'#modificar
     
     datapath_test_low = glob.glob( test_low_path)
     datapath_test_high = glob.glob(test_high_path)
@@ -222,12 +223,12 @@ def Test(config: Dict):
                     # plt.axis('off')
                     # plt.imshow(output)
                     # plt.show()
-                    # save_path = save_dir + name
-                    #cv2.imwrite(save_path, output * 255)
-                    # save_path =save_dir+ name
-                    #cv2.imwrite(save_path, res_Imgs)
+                    save_path = save_dir + name
+                    cv2.imwrite(save_path, output * 255)
+                    save_path =save_dir+ name
+                    cv2.imwrite(save_path, res_Imgs)
 
-                     # Wandb logs 
+                    # Wandb logs 
                     # wandb.log({"Inference":{
                     #     "PSNR": psnr,
                     #     "SSIM": ssim_score,
@@ -287,6 +288,7 @@ if __name__== "__main__" :
     parser.add_argument('--dataset_path', type=str, default="./data/UWData2k2/")
     parser.add_argument('--pretrained_path', type=str, default=None)  #or eval
     parser.add_argument('--output_path', type=str, default="./output/test/")  #or eval
+    
 
     config = parser.parse_args()
     #    /data/RUIE/UCCS/blue   /data/RUIE/UCCS/blue-green   /data/RUIE/UCCS/green
