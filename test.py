@@ -34,7 +34,7 @@ import argparse
 import wandb
 import matplotlib.pyplot as plt
 
-
+##Ajustar para receber tambem imagens jpg e imagens png grandes
 class load_data_test(data.Dataset):
     def __init__(self, input_data_low, input_data_high):
         self.input_data_low = input_data_low
