@@ -183,9 +183,9 @@ def Test(config: Dict):
                     snr_map = getSnrMap(lowlight_image, data_blur)
                     data_concate=torch.cat([data_color, snr_map], dim=1)
 
-                    #for i in range(-10, 10,1): 
-                        # light_high = torch.ones([1]) * i*0.1
-                        # light_high = light_high.to(device)
+                    # for i in range(-10, 10,1): 
+                    #     light_high = torch.ones([1]) * i*0.1
+                    #     light_high = light_high.to(device)
                         
                     brightness_level=gt_image.mean([1, 2, 3]) # b*1
                     time_start = time.time()
@@ -223,16 +223,16 @@ def Test(config: Dict):
                     # plt.axis('off')
                     # plt.imshow(output)
                     # plt.show()
-                    save_path = save_dir + name
-                    cv2.imwrite(save_path, output * 255)
-                    save_path =save_dir+ name
-                    cv2.imwrite(save_path, res_Imgs)
+                    # save_path = save_dir + name
+                    # cv2.imwrite(save_path, output * 255)
+                    # save_path =save_dir+ name
+                    # cv2.imwrite(save_path, res_Imgs)
 
-                    # Wandb logs 
-                    # wandb.log({"Inference":{
-                    #     "PSNR": psnr,
-                    #     "SSIM": ssim_score,
-                    #     "Image": [wandb.Image(output, caption="Image")]}})
+                    ##Wandb logs 
+                    wandb.log({"Inference":{
+                        "PSNR": psnr,
+                        "SSIM": ssim_score,
+                        "Image": [wandb.Image(output, caption="Image")]}})
   
                 avg_psnr = sum(psnr_list) / len(psnr_list) 
                 avg_ssim = sum(ssim_list) / len(ssim_list) 
@@ -300,10 +300,10 @@ if __name__== "__main__" :
     #         project="CLEDiffusion",
     #         config=vars(config),
     #         name="Inferencia Diffusao sem mascaras",
-    #         tags=["Inference"],
+    #         tags=["Inference","UWData2k2"],
     #         group="diffusion_inference",
     #         job_type="evaluation",
     #     )
     
     Test(config)
-    #wandb.finish()
+    # wandb.finish()
