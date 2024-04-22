@@ -435,8 +435,8 @@ def Test(config: Dict,epoch):
                     # plt.show()
                     # save_path = save_dir + name
                     # cv2.imwrite(save_path, output * 255)
-                    save_path =save_dir+ name+'.png'
-                    cv2.imwrite(save_path, res_Imgs)
+                    # save_path =save_dir+ name+'.png'
+                    # cv2.imwrite(save_path, res_Imgs)
 
   
                 avg_psnr = sum(psnr_list) / len(psnr_list)
@@ -453,17 +453,17 @@ def Test(config: Dict,epoch):
                 print('psnr_orgin_avg:', avg_psnr)
                 print('ssim_orgin_avg:', avg_ssim)
 
-                f = open(save_txt_name, 'w+')
-                f.write('\npsnr_orgin :')
-                f.write(str(psnr_list))
-                f.write('\nssim_orgin :')
-                f.write(str(ssim_list))
+                # f = open(save_txt_name, 'w+')
+                # f.write('\npsnr_orgin :')
+                # f.write(str(psnr_list))
+                # f.write('\nssim_orgin :')
+                # f.write(str(ssim_list))
 
-                f.write('\npsnr_orgin_avg:')
-                f.write(str(avg_psnr))
-                f.write('\nssim_orgin_avg:')
-                f.write(str(avg_ssim))
-                f.close()
+                # f.write('\npsnr_orgin_avg:')
+                # f.write(str(avg_psnr))
+                # f.write('\nssim_orgin_avg:')
+                # f.write(str(avg_ssim))
+                # f.close()
 
                 return avg_psnr,avg_ssim
 
