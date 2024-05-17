@@ -60,14 +60,14 @@ class load_data_test(data.Dataset):
 
 
         data_low = cv2.imread(self.input_data_low[idx])
-        data_low=data_low[:,:,::-1].copy()
+        data_low = data_low[:,:,::-1].copy()
         random.seed(1)
-        data_low=data_low/255.0
+        data_low = data_low/255.0
 
 
         data_low = self.transform(image=data_low)["image"]
         data_low2 = data_low
-        data_low2=data_low2*2-1
+        data_low2 = data_low2*2-1
         data_low = torch.pow(data_low, 0.25)
 
         mean=torch.tensor([0.4350, 0.4445, 0.4086])
@@ -80,7 +80,7 @@ class load_data_test(data.Dataset):
         data_max_g = data_low[1].max()
         data_max_b = data_low[2].max()
         color_max=torch.zeros((data_low.shape[0],data_low.shape[1],data_low.shape[2]))
-        color_max[0,:,:]=data_max_r*torch.ones((data_low.shape[1],data_low.shape[2]))    #这里之前都写错了，应该从color_max[0:,:]改为color_max[0,:,:]
+        color_max[0,:,:]=data_max_r*torch.ones((data_low.shape[1],data_low.shape[2]))    #这里之前都写错了，应该从color_max[0:,:]改为color_max[0,:,:]#Isso foi escrito errado antes, deveria ser alterado de color_max[0:,:] para color_max[0,:,:]
         color_max[1,:, :] = data_max_g * torch.ones((data_low.shape[1], data_low.shape[2]))
         color_max[2,:, :] = data_max_b * torch.ones((data_low.shape[1], data_low.shape[2]))
         data_color=data_low/(color_max+ 1e-6)
@@ -114,22 +114,7 @@ def getSnrMap(data_low,data_blur):
     mask = mask.float()
     return mask
 
-def rgb2gray(rgb):
-    return np.dot(rgb[...,:3], [0.2989, 0.5870, 0.1140])
 
-
-def get_color_map(im):
-    return im / (rgb2gray(im)[..., np.newaxis] + 1e-6) * 100
-    # return im / (np.mean(im, axis=-1)[..., np.newaxis] + 1e-6) * 100
-
-
-def convert_to_grayscale(image):
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    return gray_image
-
-def calculate_ssim(img1, img2):
-    score, _ = SSIM(img1, img2, full=True)
-    return score
 
 def Test(config: Dict):
     # load model and evaluate
@@ -252,7 +237,7 @@ if __name__== "__main__" :
     wandb.init(
         project="CLEDiffusion",
         config=vars(config),
-        name="Inferencia mask Diffusao",
+        name="Inferencia mask Diffusao underwater",
         tags=["Inference"],
         group="diffusion_mask_inference",
         job_type="evaluation",
