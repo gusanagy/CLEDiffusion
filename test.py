@@ -54,8 +54,8 @@ class load_data_test(data.Dataset):
         seed = torch.random.seed()
 
         data_low = cv2.imread(self.input_data_low[idx])
-        data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
-
+        #data_low = cv2.convertScaleAbs(data_low, alpha=1.0, beta=-140) #modificação para ajuste automatico de brilho para datalow
+        
         data_low=data_low[:,:,::-1].copy()
         random.seed(1)
         data_low=data_low/255.0
@@ -91,6 +91,8 @@ class load_data_test(data.Dataset):
 
 
         return [data_low, data_high,data_color,data_blur,self.input_data_low[idx]]
+        
+        
 
 
 def getSnrMap(data_low,data_blur):
